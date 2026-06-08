@@ -1,28 +1,10 @@
 {
-  "updatedAt": "2026-06-07T14:45:54.735Z",
-  "month": "2026-06",
-  "mode": "sequential quota provider pool + one amazon result per product",
+  "updatedAt": "2026-06-08T06:42:25.561215+00:00",
+  "mode": "nodriver-only google lens + amazon scraping + built-in auth proxy bridge",
   "startIndex": 0,
   "maxProducts": 50,
-  "providerUsage": {
-    "serpapi_1": 250,
-    "serpapi_2": 250,
-    "searchapi": 100,
-    "hasdata": 55,
-    "scrapingdog": 200,
-    "decodo": 48
-  },
-  "providerBudgets": {
-    "serpapi_1": 250,
-    "serpapi_2": 250,
-    "searchapi": 100,
-    "scrapingdog": 200,
-    "decodo": 700,
-    "apify": 150,
-    "openwebninja": 50,
-    "zenserp": 50
-  },
-  "matches": 12,
-  "failures": 37,
-  "note": "Uses one provider until its limit is reached, then moves to the next. One Lens request and one Amazon result per product."
+  "matches": 0,
+  "failures": 41,
+  "proxyCount": 10,
+  "note": "Uses built-in Python local bridge for authenticated residential proxies. Chrome only sees localhost proxy."
 }
