@@ -1,7 +1,9 @@
-name: Fetch Trending Products Nodriver Test
+name: Fetch Trending Products Nodriver
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 3 1 * *"
 
 permissions:
   contents: write
@@ -33,6 +35,44 @@ jobs:
         with:
           name: cj-products
           path: products.json
+
+  google-trends:
+    needs: fetch-cj
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download CJ Products
+        uses: actions/download-artifact@v4
+        with:
+          name: cj-products
+          path: .
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node Dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Fetch Google Trends
+        run: node scripts/fetch-google-trends.js
+        env:
+          GOOGLE_TRENDS_LIMIT: 500
+
+      - name: Upload Google Trends
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-trends
+          path: |
+            google-trends.json
+            trend-keywords.json
 
   amazon-nodriver:
     needs: fetch-cj
@@ -90,3 +130,53 @@ jobs:
             lens-amazon-matches.json
             lens-amazon-failures.json
             lens-amazon-meta.json
+
+  merge:
+    needs:
+      - fetch-cj
+      - google-trends
+      - amazon-nodriver
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download CJ Products
+        uses: actions/download-artifact@v4
+        with:
+          name: cj-products
+          path: .
+
+      - name: Download Google Trends
+        uses: actions/download-artifact@v4
+        with:
+          name: google-trends
+          path: .
+
+      - name: Download Amazon Nodriver Results
+        uses: actions/download-artifact@v4
+        with:
+          name: amazon-nodriver
+          path: .
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node Dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Merge Trend Signals
+        run: node scripts/merge-trend-signals.js
+
+      - name: Commit Results
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add .
+
+          git commit -m "Update trending products nodriver" || echo "No changes"
+          git push
