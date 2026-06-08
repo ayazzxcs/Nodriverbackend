@@ -95,10 +95,11 @@ jobs:
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v1
 
-      - name: Verify Chrome
+      - name: Debug Chrome
         run: |
-          google-chrome --version || true
           which google-chrome || true
+          google-chrome --version || true
+          ls -la /usr/bin/google-chrome || true
 
       - name: Install System Dependencies
         run: |
@@ -111,7 +112,8 @@ jobs:
           pip install -U nodriver
 
       - name: Fetch Monthly Lens Amazon Matches with Nodriver
-        run: xvfb-run -a python scripts/fetch-monthly-lens-amazon-nodriver.py
+        run: |
+          xvfb-run -a python scripts/fetch-monthly-lens-amazon-nodriver.py
         env:
           MONTHLY_LENS_MAX_PRODUCTS: 50
           MONTHLY_LENS_START_INDEX: 0
