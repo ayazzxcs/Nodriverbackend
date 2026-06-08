@@ -170,21 +170,29 @@ async def sleep_ms(ms):
 
 async def start_browser(proxy=None):
     args = [
-        "--disable-dev-shm-usage",
+        "--no-sandbox",
         "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
         "--disable-gpu",
+        "--remote-debugging-port=9222",
         "--window-size=1365,768",
         "--lang=en-US,en",
     ]
+
     if proxy:
         args.append(f"--proxy-server={proxy}")
 
-    print("Starting browser with Nodriver latest, headless=False, no_sandbox=True")
-    return await uc.start(
+    print("Launching Chrome:", "/usr/bin/google-chrome")
+    print("Proxy:", proxy if proxy else "none")
+
+    browser = await uc.start(
+        browser_executable_path="/usr/bin/google-chrome",
         browser_args=args,
         headless=False,
         no_sandbox=True,
     )
+
+    return browser
 
 
 async def get_text(page):
