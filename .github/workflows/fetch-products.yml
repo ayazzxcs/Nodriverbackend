@@ -115,6 +115,36 @@ jobs:
           pip install -U nodriver pproxy requests
           python -c "import nodriver; print('nodriver version:', getattr(nodriver, '__version__', 'unknown'))"
 
+      - name: Test First Webshare Proxy Directly
+        run: |
+          python - <<'PY'
+          import os
+          import requests
+
+          proxies_raw = os.environ.get("RESIDENTIAL_PROXIES", "").strip()
+          if not proxies_raw:
+              raise SystemExit("RESIDENTIAL_PROXIES secret is empty")
+
+          proxy = proxies_raw.splitlines()[0].strip()
+
+          print("Testing first proxy from RESIDENTIAL_PROXIES")
+          print("Proxy loaded:", "yes" if proxy else "no")
+
+          response = requests.get(
+              "https://ipv4.webshare.io/",
+              proxies={
+                  "http": proxy,
+                  "https": proxy,
+              },
+              timeout=30,
+          )
+
+          print("STATUS:", response.status_code)
+          print("BODY:", response.text[:500])
+          PY
+        env:
+          RESIDENTIAL_PROXIES: ${{ secrets.RESIDENTIAL_PROXIES }}
+
       - name: Fetch Monthly Lens Amazon Matches with Nodriver
         run: python scripts/fetch-monthly-lens-amazon-nodriver.py
         env:
